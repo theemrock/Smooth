@@ -1,0 +1,3 @@
+<resources>
+    <style name="Theme.Smooth" parent="android:Theme.Material.NoActionBar" />
+</resources>

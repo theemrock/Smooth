@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">SMOOTH</string>
+    <string name="home_subtitle">SMOOTH Paketi</string>
+    <string name="module_agent">Agent</string>
+    <string name="module_dialogue">Dialogue</string>
+    <string name="module_reader">Reader</string>
+    <string name="module_wiki">Wiki</string>
+    <string name="module_nav">Nav</string>
+    <string name="module_media">Media</string>
+    <string name="module_reserved">Ayrılmış</string>
+    <string name="module_settings">Ayarlar</string>
+    <string name="back">Geri</string>
+    <string name="settings_title">Ayarlar</string>
+    <string name="app_version_label">Sürüm</string>
+    <string name="check_updates">Güncellemeleri kontrol et</string>
+    <string name="update_not_implemented">Güncelleme işlevi henüz uygulanmadığından bu özellik aktif değildir.</string>
+    <string name="placeholder_desc">Bu ekran %s modülü için yer tutucu ekrandır.</string>
+    <string name="dialog_ok">Tamam</string>
+</resources>
