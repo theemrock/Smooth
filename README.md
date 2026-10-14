@@ -17,13 +17,13 @@ PowerShell:
 
 ```powershell
 $env:JAVA_HOME='C:\Program Files\Android\Android Studio\jbr'
-$env:ANDROID_HOME='ANDROID_SDK_PATH'
+$env:ANDROID_HOME = "$env:LOCALAPPDATA\Android\Sdk"
 .\gradlew.bat clean :app:testDebugUnitTest :app:assembleDebug :app:assembleDebugAndroidTest :app:lintDebug
 ```
 
 Debug APK:
 
-`C:\Projects\Smooth\app\build\outputs\apk\debug\app-debug.apk`
+`app\build\outputs\apk\debug\app-debug.apk`
 
 Instrumented testleri çalıştırmak, uygulama ve test APK’sını hedef cihaza/emülatöre kurar:
 
