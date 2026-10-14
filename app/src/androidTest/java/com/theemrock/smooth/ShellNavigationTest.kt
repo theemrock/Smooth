@@ -24,25 +24,23 @@ class ShellNavigationTest {
     val composeRule = createAndroidComposeRule<MainActivity>()
 
     @Test
-    fun homeShowsEightCardsInRequiredTwoColumnOrder() {
+    fun homeShowsSixCardsInRequiredSingleColumnOrder() {
         val modules = smoothModules()
-        assertEquals(8, modules.size)
+        assertEquals(
+            listOf("explorer", "media", "reader", "agent", "hypertext", "sensus"),
+            modules.map { it.id }
+        )
 
-        modules.chunked(2).forEach { row ->
-            scrollTo(row.first())
-            val bounds = row.map { module ->
-                composeRule.onNodeWithTag("module_${module.id}")
-                    .assertIsDisplayed()
-                    .fetchSemanticsNode().boundsInRoot
-            }
-            assertSameRow(bounds[0], bounds[1])
-            assertTrue("left card must precede right card", bounds[0].left < bounds[1].left)
+        modules.forEach { module ->
+            scrollTo(module)
+            composeRule.onNodeWithTag("module_${module.id}")
+                .assertIsDisplayed()
         }
     }
 
     @Test
     fun everyCardOpensItsExpectedScreenAndTopBarBackReturnsHome() {
-        smoothModules().filterNot { it.id == "settings" }.forEach { module ->
+        smoothModules().forEach { module ->
             scrollTo(module)
             composeRule.onNodeWithTag("module_${module.id}").performClick()
             composeRule.onNodeWithText(placeholderText(module)).assertIsDisplayed()
@@ -50,8 +48,7 @@ class ShellNavigationTest {
             composeRule.onNodeWithText(text(R.string.home_subtitle)).assertIsDisplayed()
         }
 
-        scrollTo(smoothModules().last())
-        composeRule.onNodeWithTag("module_settings").performClick()
+        composeRule.onNodeWithTag("settings_button").performClick()
         composeRule.onAllNodesWithText(text(R.string.settings_title)).assertCountEquals(1)
         composeRule.onNodeWithText(BuildConfig.VERSION_NAME).assertIsDisplayed()
         composeRule.onNodeWithContentDescription(text(R.string.back)).performClick()
@@ -105,9 +102,7 @@ class ShellNavigationTest {
 
     @Test
     fun settingsShowsRealStateAndSurvivesRecreationThenSystemBack() {
-        val settings = smoothModules().last()
-        scrollTo(settings)
-        composeRule.onNodeWithTag("module_settings").performClick()
+        composeRule.onNodeWithTag("settings_button").performClick()
 
         composeRule.onNodeWithText(text(R.string.app_name)).assertIsDisplayed()
         composeRule.onNodeWithText(BuildConfig.VERSION_NAME).assertIsDisplayed()
@@ -122,7 +117,7 @@ class ShellNavigationTest {
     }
 
     private fun scrollTo(module: ModuleItem) {
-        composeRule.onNodeWithTag("module_grid")
+        composeRule.onNodeWithTag("module_list")
             .performScrollToNode(hasTestTag("module_${module.id}"))
     }
 
@@ -131,8 +126,4 @@ class ShellNavigationTest {
 
     private fun text(resourceId: Int, vararg args: Any): String =
         composeRule.activity.getString(resourceId, *args)
-
-    private fun assertSameRow(left: Rect, right: Rect) {
-        assertEquals(left.top, right.top, 1f)
-    }
 }

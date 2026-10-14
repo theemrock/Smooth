@@ -7,7 +7,7 @@ class ShellModelTest {
     @Test
     fun modulesHaveRequiredOrderAndDestinations() {
         assertEquals(
-            listOf("agent", "dialogue", "reader", "wiki", "nav", "media", "reserved", "settings"),
+            listOf("explorer", "media", "reader", "agent", "hypertext", "sensus"),
             smoothModules().map(ModuleItem::id)
         )
     }

@@ -2,6 +2,9 @@
     <string name="app_name">SMOOTH</string>
     <string name="home_subtitle">SMOOTH Paketi</string>
     <string name="module_agent">Agent</string>
+    <string name="module_sensus">Sensus</string>
+    <string name="module_hypertext">Hypertext</string>
+    <string name="module_explorer">Explorer</string>
     <string name="module_dialogue">Dialogue</string>
     <string name="module_reader">Reader</string>
     <string name="module_wiki">Wiki</string>

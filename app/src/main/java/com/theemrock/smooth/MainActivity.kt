@@ -1,6 +1,5 @@
 package com.theemrock.smooth
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.BackHandler
 import androidx.activity.ComponentActivity
@@ -11,9 +10,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -23,7 +22,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.testTag
@@ -31,7 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.theemrock.smooth.ui.theme.SmoothTheme
-import com.theemrock.smoothreader.MainActivity as ReaderMainActivity
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -56,14 +54,12 @@ sealed class Screen(val route: String) {
 data class ModuleItem(val id: String, val titleResId: Int)
 
 fun smoothModules() = listOf(
-    ModuleItem("agent", R.string.module_agent),
-    ModuleItem("dialogue", R.string.module_dialogue),
-    ModuleItem("reader", R.string.module_reader),
-    ModuleItem("wiki", R.string.module_wiki),
-    ModuleItem("nav", R.string.module_nav),
+    ModuleItem("explorer", R.string.module_explorer),
     ModuleItem("media", R.string.module_media),
-    ModuleItem("reserved", R.string.module_reserved),
-    ModuleItem("settings", R.string.module_settings)
+    ModuleItem("reader", R.string.module_reader),
+    ModuleItem("agent", R.string.module_agent),
+    ModuleItem("hypertext", R.string.module_hypertext),
+    ModuleItem("sensus", R.string.module_sensus)
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -72,7 +68,7 @@ fun SmoothApp() {
     var currentRoute by rememberSaveable { mutableStateOf(Screen.Home.route) }
     var selectedModuleId by rememberSaveable { mutableStateOf("") }
 
-    val context = LocalContext.current
+
     val modules = smoothModules()
     val selectedModule = modules.firstOrNull { it.id == selectedModuleId }
     val navigateHome = {
@@ -95,6 +91,19 @@ fun SmoothApp() {
                         },
                         fontWeight = FontWeight.Bold
                     )
+                },
+                actions = {
+                    if (currentRoute == Screen.Home.route) {
+                        IconButton(
+                            onClick = { currentRoute = Screen.Settings.route },
+                            modifier = Modifier.testTag("settings_button")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Settings,
+                                contentDescription = stringResource(R.string.settings_title)
+                            )
+                        }
+                    }
                 },
                 navigationIcon = {
                     if (currentRoute != Screen.Home.route) {
@@ -126,16 +135,8 @@ fun SmoothApp() {
                     HomeScreen(
                         modules = modules,
                         onModuleClick = { module ->
-                            if (module.id == "reader") {
-                                context.startActivity(
-                                    Intent(context, ReaderMainActivity::class.java)
-                                )
-                            } else if (module.id == "settings") {
-                                currentRoute = Screen.Settings.route
-                            } else {
-                                selectedModuleId = module.id
-                                currentRoute = Screen.Placeholder.createRoute(module.id)
-                            }
+                                                        selectedModuleId = module.id
+                            currentRoute = Screen.Placeholder.createRoute(module.id)
                         }
                     )
                 }
@@ -167,13 +168,10 @@ fun HomeScreen(
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .testTag("module_grid")
+                .testTag("module_list")
         ) {
             items(modules) { module ->
                 ModuleCard(module = module, onClick = { onModuleClick(module) })
@@ -194,7 +192,7 @@ fun ModuleCard(
         ),
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 110.dp)
+            .heightIn(min = 72.dp)
             .testTag("module_${module.id}")
             .clickable(onClick = onClick)
     ) {

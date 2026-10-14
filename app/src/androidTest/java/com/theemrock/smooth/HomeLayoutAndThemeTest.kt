@@ -40,7 +40,7 @@ class HomeLayoutAndThemeTest {
         }
 
         testModules().forEach { module ->
-            composeRule.onNodeWithTag("module_grid")
+            composeRule.onNodeWithTag("module_list")
                 .performScrollToNode(hasTestTag("module_${module.id}"))
             val cardBounds = composeRule.onNodeWithTag("module_${module.id}")
                 .assertIsDisplayed().fetchSemanticsNode().boundsInRoot
@@ -96,14 +96,5 @@ class HomeLayoutAndThemeTest {
         }
     }
 
-    private fun testModules() = listOf(
-        ModuleItem("agent", R.string.module_agent),
-        ModuleItem("dialogue", R.string.module_dialogue),
-        ModuleItem("reader", R.string.module_reader),
-        ModuleItem("wiki", R.string.module_wiki),
-        ModuleItem("nav", R.string.module_nav),
-        ModuleItem("media", R.string.module_media),
-        ModuleItem("reserved", R.string.module_reserved),
-        ModuleItem("settings", R.string.module_settings)
-    )
+    private fun testModules() = smoothModules()
 }

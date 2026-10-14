@@ -16,4 +16,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "Smooth"
 include(":app")
-include(":reader")
