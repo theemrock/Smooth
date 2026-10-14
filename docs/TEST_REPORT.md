@@ -45,7 +45,7 @@ Ortam değişkenleri kullanılan Gradle komutlarında:
 
 ```powershell
 $env:JAVA_HOME='C:\Program Files\Android\Android Studio\jbr'
-$env:ANDROID_HOME='ANDROID_SDK_PATH'
+$env:ANDROID_HOME = "$env:LOCALAPPDATA\Android\Sdk"
 ```
 
 | Komut | Sonuç | Kanıt |
