@@ -8,7 +8,7 @@ val smoothVersionName = providers.gradleProperty("smoothVersionName").get()
 
 android {
     namespace = "com.theemrock.smooth"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.theemrock.smooth"
@@ -41,6 +41,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":reader"))
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)

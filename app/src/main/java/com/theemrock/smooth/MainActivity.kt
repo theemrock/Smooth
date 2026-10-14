@@ -1,5 +1,6 @@
-﻿package com.theemrock.smooth
+package com.theemrock.smooth
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.BackHandler
 import androidx.activity.ComponentActivity
@@ -22,6 +23,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.testTag
@@ -29,6 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.theemrock.smooth.ui.theme.SmoothTheme
+import com.theemrock.smoothreader.MainActivity as ReaderMainActivity
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -69,6 +72,7 @@ fun SmoothApp() {
     var currentRoute by rememberSaveable { mutableStateOf(Screen.Home.route) }
     var selectedModuleId by rememberSaveable { mutableStateOf("") }
 
+    val context = LocalContext.current
     val modules = smoothModules()
     val selectedModule = modules.firstOrNull { it.id == selectedModuleId }
     val navigateHome = {
@@ -122,7 +126,11 @@ fun SmoothApp() {
                     HomeScreen(
                         modules = modules,
                         onModuleClick = { module ->
-                            if (module.id == "settings") {
+                            if (module.id == "reader") {
+                                context.startActivity(
+                                    Intent(context, ReaderMainActivity::class.java)
+                                )
+                            } else if (module.id == "settings") {
                                 currentRoute = Screen.Settings.route
                             } else {
                                 selectedModuleId = module.id
