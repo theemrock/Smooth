@@ -9,3 +9,8 @@ captures/
 .cxx/
 *.hprof
 .tools/
+
+# Local backups and signing keys
+*.bak
+*.jks
+*.keystore

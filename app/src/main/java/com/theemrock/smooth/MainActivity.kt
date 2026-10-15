@@ -1,6 +1,11 @@
 package com.theemrock.smooth
 
 import android.os.Bundle
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
 import androidx.activity.compose.BackHandler
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -53,18 +58,32 @@ sealed class Screen(val route: String) {
 
 data class ModuleItem(val id: String, val titleResId: Int)
 
-fun smoothModules() = listOf(
-    ModuleItem("explorer", R.string.module_explorer),
-    ModuleItem("media", R.string.module_media),
-    ModuleItem("reader", R.string.module_reader),
-    ModuleItem("agent", R.string.module_agent),
-    ModuleItem("hypertext", R.string.module_hypertext),
-    ModuleItem("sensus", R.string.module_sensus)
-)
+fun smoothModules() = ModuleRegistry.modules.map {
+    ModuleItem(it.id, it.titleResId)
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SmoothApp() {
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    var moduleStatuses by remember {
+        mutableStateOf<Map<String, ModuleStatus>>(emptyMap())
+    }
+
+    DisposableEffect(context, lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                moduleStatuses = ModuleRegistry.modules.associate { module ->
+                    module.id to ModuleRegistry.getStatus(context, module)
+                }
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
     var currentRoute by rememberSaveable { mutableStateOf(Screen.Home.route) }
     var selectedModuleId by rememberSaveable { mutableStateOf("") }
 
@@ -134,9 +153,24 @@ fun SmoothApp() {
                 currentRoute == Screen.Home.route -> {
                     HomeScreen(
                         modules = modules,
+                        statuses = moduleStatuses,
                         onModuleClick = { module ->
-                                                        selectedModuleId = module.id
-                            currentRoute = Screen.Placeholder.createRoute(module.id)
+                            val definition = ModuleRegistry.modules.firstOrNull { it.id == module.id }
+                            val result = if (definition == null) {
+                                LaunchResult.NOT_CONFIGURED
+                            } else {
+                                ModuleLauncher.launch(context, definition)
+                            }
+                            if (result != LaunchResult.LAUNCHED) {
+                                val message = when (result) {
+                                    LaunchResult.NOT_INSTALLED -> "Module not installed"
+                                    LaunchResult.NOT_CONFIGURED -> "Module not configured"
+                                    LaunchResult.NOT_LAUNCHABLE -> "Module cannot be launched"
+                                    LaunchResult.FAILED -> "Module launch failed"
+                                    LaunchResult.LAUNCHED -> ""
+                                }
+                                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                            }
                         }
                     )
                 }
@@ -154,6 +188,7 @@ fun SmoothApp() {
 @Composable
 fun HomeScreen(
     modules: List<ModuleItem>,
+    statuses: Map<String, ModuleStatus>,
     onModuleClick: (ModuleItem) -> Unit
 ) {
     Column(
@@ -174,7 +209,11 @@ fun HomeScreen(
                 .testTag("module_list")
         ) {
             items(modules) { module ->
-                ModuleCard(module = module, onClick = { onModuleClick(module) })
+                ModuleCard(
+                    module = module,
+                    status = statuses[module.id] ?: ModuleStatus.NOT_CONFIGURED,
+                    onClick = { onModuleClick(module) }
+                )
             }
         }
     }
@@ -183,8 +222,16 @@ fun HomeScreen(
 @Composable
 fun ModuleCard(
     module: ModuleItem,
+    status: ModuleStatus,
     onClick: () -> Unit
 ) {
+    val statusText = when (status) {
+        ModuleStatus.INSTALLED -> "Installed"
+        ModuleStatus.NOT_INSTALLED -> "Not installed"
+        ModuleStatus.NOT_CONFIGURED -> "Not configured"
+        ModuleStatus.NOT_LAUNCHABLE -> "Not launchable"
+    }
+
     Card(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
@@ -196,11 +243,11 @@ fun ModuleCard(
             .testTag("module_${module.id}")
             .clickable(onClick = onClick)
     ) {
-        Box(
+        Column(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
                 .padding(16.dp),
-            contentAlignment = Alignment.Center
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = stringResource(module.titleResId),
@@ -209,10 +256,15 @@ fun ModuleCard(
                 color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center
             )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = statusText,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
-
 @Composable
 fun PlaceholderScreen(module: ModuleItem) {
     val moduleName = stringResource(module.titleResId)
